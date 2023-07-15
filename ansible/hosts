@@ -1,0 +1,4 @@
+[vhosts]
+hpt730a ansible_user=automation
+hpt730b ansible_user=automation
+hpt730c ansible_user=automation

@@ -1,0 +1,69 @@
+--- # Run with:  ansible-playbook proxmoxve_install.yaml -i hosts
+- name: Install proxmox
+  hosts: "{{ target | lower }}"
+  become: true
+  gather_facts: yes
+  vars:
+    resolvlines: 
+      - regex:  '^domain'
+        replace: 'domain lab.test.'
+      - regex:  '^search'
+        replace: 'search lab.test.'
+    pvkeyring:   '/etc/apt/trusted.gpg.d/proxmox-ve-no-subscription.asc'
+    postfixdebconf:
+      - question: 'postfix/bad_recipient_delimiter' 
+        vtype:    'error'
+        value:    ''
+      - question: 'postfix/chattr'
+        vtype:    'boolean'
+        value:    'false'
+      - question: 'postfix/destinations'
+        vtype:    'string'
+        value:    "$myhostname, {{ target }}.lab.test, localhost.lab.test, localhost"
+      - question: 'postfix/mailbox_limit'
+        vtype:    'string'
+        value:    '0'
+      - question: 'postfix/mailname'
+        vtype:    'string'  
+        value:    'hpt730-3.lab.test'
+      - question: 'postfix/main_mailer_type'
+        vtype:    'select'
+        value:    'Local only'
+      - question: 'postfix/mynetworks'
+        vtype:    'string'
+        value:    '127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128'
+      - question: 'postfix/newaliases'
+        vtype:    'boolean'
+        value:    'false'
+      - question: 'postfix/not_configured'
+        vtype:    'error'
+        value:    ''
+      - question: 'postfix/procmail'
+        vtype:    'boolean'
+        value:    'false'
+      - question: 'postfix/protocols'
+        vtype:    'select'
+        value:    'all'
+      - question: 'postfix/recipient_delim'
+        vtype:    'string'
+        value:    '+'
+      - question: 'postfix/relayhost'
+        vtype:    'string'
+        value:    ''
+      - question: 'postfix/rfc1035_violation'
+        vtype:    'boolean'
+        value:    'false'
+      - question: 'postfix/root_address'
+        vtype:    'string'
+        value:    ''
+
+  vars_prompt:
+    - name: target
+      prompt: Which host would you like to install Proxmox VE on?
+      private: no
+
+  tasks:
+    - name: Install ntpsec
+      ansible.builtin.apt:
+        name: ntpsec
+        state: present
